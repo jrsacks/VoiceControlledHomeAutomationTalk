@@ -1,50 +1,623 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Voice Controlled Home Automation in JavaScript</title>
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black.css">
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h2>Voice Controlled</h2>
+          <h2>Home Automation</h2> 
+          <h2>in JavaScript</h2>
+          <p>Jeff Sacks</p>
+        </section>
+        <section>
+          <h2>Outline</h2>
+          <div class='stretch'>
+            <ul>
+              <li>Questions - Interrupt at any time</li>
+              <li>Discuss Home Automation</li>
+              <li>Discuss Voice Technologies</li>
+              <li>Build Skill for Amazon Echo</li>
+              <li>Control a TV with just our voice</li>
+            </ul>
+            <div class='fragment'>
+              <p>Twitter: @jeff_sacks</p>
+              <p>GitHub: jrsacks</p>
+              <p>DRW Trading Group (Chicago)</p>
+              <p>JavaScript, Ruby, Clojure, Java</p>
+            </div>
+          </div>
+        </section>
+        <section>
+          <h2>Home Automation</h2>
+          <div class='stretch'>
+            <div>
+              <ul>
+                <li class='fragment'>Philips Hue Connected Bulb
+                  <div>16 Million Colors</div>
+                  <div>Control lights from anywhere via app</div>
+                  <div>Geofencing, scheduling, sync with music</div>
+                </li>
+                <li class='fragment'>Nest Learning Thermostat
+                  <div>Learns what temps you like</div>
+                  <div>Saves you money</div>
+                  <div>Alerts</div>
+                </li>
+                <li class='fragment'>Samsung SmartThings Hub
+                  <div>Lighting, Security, Entertainment</div>
+                  <div>Sensors: Water leak, arrival, motion</div>
+                  <div>Control via an app</div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section>
+          <h2>Voice Services</h2>
+          <div class='stretch'>
+            <div>
+              <ul>
+                <li class='fragment'>Cars - Ford Sync
+                  <div>First released in 2007</div>
+                  <div>Make calls or send texts</div>
+                  <div>Interact with navigation</div>
+                  <div>Control music and climate</div>
+                </li>
+                <li class='fragment'>Phone/Computer - Siri/Cortana/Google Now
+                  <div>Make calls or send texts</div>
+                  <div>Set timers/calendar</div>
+                  <div>Control music</div>
+                </li>
+                <li class='fragment'>Devices - Amazon Echo
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section>
+          <h2>Amazon Echo</h2>
+          <div class='stretch'>
+            <p>Fancy speaker for $179</p>
+            <p>Always listening for 'Alexa' (or 'Amazon' or 'Echo')</p>
+            <ul>
+              <li class="fragment">Alexa, What's the weather for tomorrow?</li>
+              <li class="fragment">Alexa, What time is it?</li>
+              <li class="fragment">Alexa, Who was the 23rd president?</li>
+              <li class="fragment">Alexa, What is your birthday?</li>
+              <li class="fragment">Alexa, Tell a joke.</li>
+            </ul>
+          </div>
+        </section>
+        <section>
+          <h2>What Is Alexa?</h2>
+          <div class='stretch'>
+            <img src="/diagram.png" />
+          </div>
+        </section>
+        <section>
+          <h2>Echo Fun Facts</h2>
+          <div class='stretch'>
+            <p>June 25, 2015 Alexa Skills Kit Released</p>
+            <p>Write your own skill (app) for Alexa</p>
+            <p>Over 1,400 published skills</p>
+            <p>Pandora, Dominos Pizza, Uber, Jeff's TV</p>
+          </div>
+        </section>
+        <section>
+          <h2>Hello World</h2>
+          <div class='stretch'>
+            <h4>AWS Lambda Function:</h4>
+            <pre><code data-trim data-noescape>
+exports.handler = function (event, context) {
+  context.succeed({
+    version: "1.0",
+    response: {
+      outputSpeech: {
+        type: "PlainText",
+        text: "Hello, this is the first demo"
+      },
+      shouldEndSession: true
+    }
+  });
+}
+          </code></pre>
+          </div>
+        </section>
+        <section>
+          <h2>Interaction Model</h2>
+          <div class='stretch'>
+            <div class='fragment'>
+              <p>Utterances</p>
+              <pre><code data-trim data-noescape>
+RepeatName To say {name}
+              </code></pre>
+            </div>
+            <div class='fragment'>
+              <p>Intents</p>
+              <pre><code data-trim data-noescape>
+{
+  "intents": [
+    { 
+      "intent": "RepeatName", 
+      "slots": [{"name":"name","type":"AMAZON.US_FIRST_NAME"}]
+    }
+  ]
+}
+              </code></pre>
+            </div>
+          </div>
+        </section>
+        <section>
+          <h2>Skill Setup Part 1</h2>
+          <div class='stretch'>
+            <img src="/setup1.png" />
+          </div>
+        </section>
+        <section>
+          <h2>Skill Setup Part 2</h2>
+          <div class='stretch'>
+            <img src="/setup2.png" />
+          </div>
+        </section>
+        <section>
+          <h2>Repeater Skill</h2>
+          <div class='stretch'>
+            <h4>AWS Lambda Function:</h4>
+            <pre><code data-trim data-noescape>
+exports.handler = function (event, context) {
+  context.succeed({
+    version: "1.0",
+    response: {
+      outputSpeech: {
+        type: "PlainText",
+        text: "I heard you say: " + event.request.intent.slots.name.value
+      },
+      shouldEndSession: true
+    }
+  });
+}
+            </code></pre>
+          </div>
+        </section>
+        <section>
+          <h2>AWS Simple Queue Service (SQS)</h2>
+          <div class='stretch'>
+            <ul>
+              <li>SendMessage</li>
+              <li>ReceiveMessage</li>
+              <li>DeleteMessage</li>
+            </ul>
+          </div>
+        </section>
+        <section>
+          <h4>Sending to AWS SQS:</h4>
+          <div class='stretch'>
+            <pre><code data-trim data-noescape style='max-height:1000px;'>
+var AWS = require('aws-sdk');
+var QUEUE_URL = "https://sqs.us-east-1.amazonaws.com/664786522906/midwestJs-demo";
+var sqs = new AWS.SQS({region : 'us-east-1'});
 
-		<title>reveal.js</title>
+exports.handler = function (event, context) {
+  var value = event.request.intent.slots.name.value;
+  var params = { MessageBody: value, QueueUrl: QUEUE_URL };
+  sqs.sendMessage(params, function(error){
+    var text = "I sent " + value + " to SQS";
+    if(error){
+      text = "Error sending to SQS";
+    }
+    context.succeed({
+      version: "1.0",
+      response: {
+        outputSpeech: {
+          type: "PlainText",
+          text: text
+        },
+        shouldEndSession: true
+      }
+    });
+  });
+}
+            </code></pre>
+          </div>`
+        </section>
+        <section>
+          <h4>Listening to AWS SQS:</h4>
+          <div class='stretch'>
+            <pre><code data-trim data-noescape>
+var AWS = require('aws-sdk');
+var sqs = new AWS.SQS({apiVersion: '2012-11-05', region : 'us-east-1'});
+var params = {
+  QueueUrl: "https://sqs.us-east-1.amazonaws.com/664786522906/midwestJs-demo",
+  MaxNumberOfMessages : 1,
+  WaitTimeSeconds: 20
+};
+sqs.receiveMessage(params, function(err, data) {
+  if(data && data.Messages){
+    data.Messages.forEach(function(message){
+      console.log(message.Body);
+    });
+  }
+});
+            </code></pre>
+          </div>`
+        </section>
+        <section>
+          <h4>TiVo TCP Remote Protocol</h4>
+          <div class='stretch'>
+            <p class='fragment'>COMMAND {PARAMETER} {PARAMETER}...</p>
+            <p class='fragment'>FORCECH 602</p>
+            <p class='fragment'>TELEPORT GUIDE</p>
+            <p class='fragment'>TELEPORT LIVETV</p>
+          </div>
+        </section>
+        <section>
+          <h4>Using TiVo TCP Remote Protocol</h4>
+          <div class='stretch'>
+            <pre><code data-trim data-noescape style='max-height:1000px;'>
+var express = require('express');
+var net = require('net');
 
-		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+var tivo = net.connect({host: '192.168.1.7', port: 31339}, function(){
+  var app = express();
 
-		<!-- Theme used for syntax highlighting of code -->
-		<link rel="stylesheet" href="lib/css/zenburn.css">
+  app.get('/tivo/ch/:channel', function(request, response){
+    tivo.write("FORCECH" + request.params.channel + "\r");
+    response.end();
+  });
 
-		<!-- Printing and PDF exports -->
-		<script>
-			var link = document.createElement( 'link' );
-			link.rel = 'stylesheet';
-			link.type = 'text/css';
-			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
-			document.getElementsByTagName( 'head' )[0].appendChild( link );
-		</script>
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
-		</div>
+  app.get('/tivo/:command/:val', function(request, response){
+    tivo.write(request.params.command + request.params.val + "\r");
+    response.end();
+  });
 
-		<script src="lib/js/head.min.js"></script>
-		<script src="js/reveal.js"></script>
+  app.listen(3000);
+});
+            </code></pre>
+          </div>
+        </section>
+        <section>
+          <h4>Sharp Aquos TCP Protocol</h4>
+          <div class='stretch'>
+            <p>{COMMAND}{PARAMTER}&ltCR&gt</p>
+            <p>4 Character length Command</p>
+            <p>4 Character length Parameter</p>
+            <ul>
+              <li class="fragment">Power: "POWR0   \r"</li>
+              <li class="fragment">Input: "IAVD3   \r"</li>
+              <li class="fragment">Volume: "VOLM18  \r"</li>
+              <li class="fragment">Mute: "MUTE2   \r"</li>
+            </ul>
+          </div>
+        </section>
+        <section>
+          <h4>TV Socket Wrapper</h4>
+          <div class='stretch'>
+            <pre style="line-height:1.05em"><code data-trim data-noescape style='max-height:1000px;'>
+function tvConnection(socket){
+  var volume = 15;
+  function sendCommand(command, value){
+    if(value.length === 4){
+      socket.write(command + value + "\r");
+    } else {
+      sendCommand(command, value + " ");
+    }
+  };
+  function setVolume(vol){
+    volume = vol;
+    changeVolume(0);
+  };
+  function changeVolume(change){
+    volume += change;
+    sendCommand("VOLM", volume.toString());
+  };
+  function power(on){
+    if(on){
+      sendCommand("POWR", "1");
+      sendCommand("IAVD", "1");
+    } else {
+      sendCommand("POWR", "0");
+    }
+  }
+  function mute(on){
+    sendCommand("MUTE", on ? "1" : "2");
+  }
+  return {mute: mute, power : power, setVolume : setVolume, changeVolume: changeVolume};
+}
+            </code></pre>
+          </div>
+        </section>
+        <section>
+          <h4>TiVo Socket Wrapper</h4>
+          <div class='stretch'>
+            <pre><code data-trim data-noescape style='max-height:1000px;'>
+function tivoConnection(socket){
+  function sendCommand(command, value){
+    socket.write(command + " " + value + "\r");
+  }
+  function setChannel(channel){
+    sendCommand("FORCECH", channel);
+  }
+  return {sendCommand : sendCommand, setChannel : setChannel};
+}
 
-		<script>
-			// More info https://github.com/hakimel/reveal.js#configuration
-			Reveal.initialize({
-				history: true,
+var tvSocket = net.connect({host: '192.168.1.3', port: 10002}, function(){
+  var tivoSocket = net.connect({host: '192.168.1.7', port: 31339}, function(){
+    buildApp(tvConnection(tvSocket), tivoConnection(tivoSocket));
+  });
+});
+            </code></pre>
+          </div>
+        </section>
+        <section>
+          <h4>TiVo Routes </h4>
+          <div class='stretch'>
+            <pre><code data-trim data-noescape style='max-height:1000px;'>
+function buildApp(tv, tivo){
+  var app = express();
+  app.use(express.static('public'));
 
-				// More info https://github.com/hakimel/reveal.js#dependencies
-				dependencies: [
-					{ src: 'plugin/markdown/marked.js' },
-					{ src: 'plugin/markdown/markdown.js' },
-					{ src: 'plugin/notes/notes.js', async: true },
-					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
-				]
-			});
-		</script>
-	</body>
+  app.use(function (request, response, next) {
+    next();
+    response.end();
+  });
+
+  app.get('/tivo/ch/:channel', function(request, response){
+    tv.power(true);
+    tivo.setChannel(request.params.channel);
+  });
+
+  app.get('/tivo/:command/:val', function(request, response){
+    tivo.sendCommand(request.params.command, request.params.val);
+  });
+
+  app.listen(3000);
+}
+            </code></pre>
+          </div>
+        </section>
+        <section>
+          <h4>TV Routes </h4>
+          <div class='stretch'>
+            <pre><code data-trim data-noescape style='max-height:1000px;'>
+app.get('/tv/volume/:vol', function(request, response){
+  var volParam = request.params.vol;
+  if(volParam === 'up'){
+    tv.changeVolume(1);
+  } else if (volParam === 'down'){
+    tv.changeVolume(-1);
+  } else {
+    tv.setVolume(parseInt(volParam, 10));
+  }
+});
+
+app.get('/tv/mute', function(request, response){
+  tv.mute(true);
+});
+
+app.get('/tv/unmute', function(request, response){
+  tv.mute(false);
+});
+
+app.get('/tv/power/off', function(request, response){
+  tv.power(false);
+});
+            </code></pre>
+          </div>
+        </section>
+        <section>
+          <h4>TV Remote Intents</h4>
+          <div class='stretch'>
+            <pre><code data-trim data-noescape style='max-height:1000px;'>
+{
+  "intents": [
+    {"intent": "ChangeChannel", 
+        "slots": [{"name": "Channel","type": "LIST_OF_CHANNELS"}]},
+    { "intent": "Off"},
+    { "intent": "VolUp"},
+    { "intent": "VolDown"},
+    { "intent": "VolSet", 
+        "slots": [{"name":"Volume","type":"AMAZON.NUMBER"}]},
+    { "intent": "Back"},
+    { "intent": "Mute"},
+    { "intent": "UnMute"}
+  ]
+}
+            </code></pre>
+          </div>
+        </section>
+        <section>
+          <h4>Custom Slot Types</h4>
+          <div class='stretch'>
+            <pre><code data-trim data-noescape style='max-height:1000px;'>
+          LIST_OF_CHANNELS	CBS | NBC | ABC | WGN | FOX | ESPN | ESPN2 | CSN | BTN...
+            </code></pre>
+          </div>
+        </section>
+        <section>
+          <h4>TV Remote Utterances</h4>
+          <div class='stretch'>
+            <pre><code data-trim data-noescape style='max-height:1000px;'>
+Off turn off
+ChangeChannel turn on {Channel}
+ChangeChannel change to {Channel}
+VolUp turn up the volume
+VolUp make it louder
+VolUp be louder
+VolDown turn down the volume
+VolDown make it softer
+VolDown make it quieter
+VolSet set the volume to {Volume}
+VolSet make the volume {Volume}
+Back switch back
+Back switch to the last channel
+Back go back
+Mute mute
+UnMute unmute
+            </code></pre>
+          </div>
+        </section>
+        <section>
+          <h4>TV Skill (Part I)</h4>
+          <div class='stretch'>
+            <pre><code data-trim data-noescape style='max-height:1000px;'>
+var QUEUE_URL = 'https://sqs.us-east-1.amazonaws.com/664786522906/alexa-tv-queue';
+var AWS = require('aws-sdk');
+var sqs = new AWS.SQS({region : 'us-east-1'});
+
+exports.handler = function (event, context) {
+  handleIntent(event.request, function(response){
+    context.succeed({
+      version: "1.0",
+      response: {
+        outputSpeech: {
+          type: "PlainText",
+          text: response
+        },
+        shouldEndSession: true
+      }
+    });
+  });
+};
+            </code></pre>
+          </div>
+        </section>
+        <section>
+          <h4>TV Skill (Part II)</h4>
+          <div class='stretch'>
+            <pre><code data-trim data-noescape style='max-height:1000px;'>
+function sendToSqs(message, speech, callback){
+  var params = { MessageBody: message, QueueUrl: QUEUE_URL };
+  sqs.sendMessage(params, function(err){ callback(speech); });
+}
+
+function handleIntent(intentRequest, callback) {
+  var intent = intentRequest.intent;
+  var intentName = intent.name;
+
+  var invokeSqs = function(message, speech){ 
+    return function(){ sendToSqs(message, speech, callback); };
+  };
+  var intents = {
+    "Off"               : invokeSqs("/tv/power/off", "Now Turning off the TV"),
+    "VolUp"             : invokeSqs("/tv/volume/up", "Turning Volume Up"),
+    "VolDown"           : invokeSqs("/tv/volume/down", "Turning Volume Down"),
+    "Mute"              : invokeSqs("/tv/mute", "Muting"),
+    "UnMute"            : invokeSqs("/tv/unmute", "Unmuting"),
+    "Back"              : invokeSqs("/tivo/IRCODE/ENTER", "Switching Back"),
+    "VolSet"            : function(){ setVolume(intent, callback);},
+    "ChangeChannel"     : function(){ changeChannel(intent, callback);}
+  };
+
+  intents[intentName]();
+}
+            </code></pre>
+          </div>
+        </section>
+        <section>
+          <h4>TV Skill (Part III)</h4>
+          <div class='stretch'>
+            <pre><code data-trim data-noescape style='max-height:1000px;'>
+function channelNumber(val){
+  if(parseInt(val, 10) > 0){
+    return val;
+  }
+  var channels = {
+    cbs: 602, nbc: 605, abc: 607,
+    wgn: 609, fox: 612, espn: 681,
+    espn2: 682 
+  };
+  var lower = val.toLowerCase();
+  return channels[lower];
+}
+
+function changeChannel(intent, callback){
+  var num = channelNumber(intent.slots.Channel.value);
+  sendToSqs("/tivo/ch/" + num, "Changing the channel to " + num, callback);
+}
+
+function setVolume(intent, callback){
+  var vol = intent.slots.Volume.value;
+  sendToSqs("/tv/volume/" + vol, "Changing the volume to " + vol, callback);
+}
+            </code></pre>
+          </div>
+        </section>
+        <section>
+          <h4>Connecting SQS to the Remote</h4>
+          <div class='stretch'>
+            <pre><code data-trim data-noescape style='max-height:1000px;'>
+#!/usr/bin/env sh
+
+set -e
+
+while true; do
+  node sqsListener.js | xargs -I{} curl http://127.0.0.1:3000{}
+done
+            </code></pre>
+          </div>
+        </section>
+        <section>
+          <h4>Video Demo</h4>
+          <div class='stretch'>
+          </div>
+        </section>
+        <section>
+          <h4>Links</h4>
+          <div class='stretch'>
+            <ul>
+              <li>
+                <a href='https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/getting-started-guide'>
+                  Getting Started With Alexa Skills Kit
+                </a>
+              </li>
+              <li>
+                <a href='https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/alexa-skills-kit-interface-reference'>
+                  JSON Interface Reference for Custom Skills
+                </a>
+              </li>
+              <li>
+                <a href='https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/getting-started-guide'>
+                  Alexa Voice Service API Overview
+                </a>
+              </li>
+              <li>
+                <a href='https://www.tivo.com/assets/images/abouttivo/resources/downloads/brochures/TiVo_TCP_Network_Remote_Control_Protocol.pdf'>
+                  TiVo TCP Remote Control Protocol
+                </a>
+              </li>
+              <li>
+                <a href='http://www.manualslib.com/manual/318372/Sharp-Aquos-Lc-70le632u.html?page=66#manual '>
+                  Sharp Aquos TCP Protocol
+                </a>
+              </li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+      Reveal.initialize({
+        width: '100%',
+        margin: .03,
+        history: true,
+        dependencies: [
+          { src: 'plugin/markdown/marked.js' },
+          { src: 'plugin/markdown/markdown.js' },
+          { src: 'plugin/notes/notes.js', async: true },
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+        ]
+      });
+    </script>
+  </body>
 </html>
