@@ -1,0 +1,5 @@
+Slides for MidwestJS 2016
+Voice Controlled Home Automation in JavaScript
+August 11, 2016
+
+To view presentation run 'python -m SimpleHTTPServer 8080' and navigate in a browser to http://localhost:8080
